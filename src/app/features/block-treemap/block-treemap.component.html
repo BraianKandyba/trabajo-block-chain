@@ -1,0 +1,66 @@
+<h3>Vista del bloque</h3>
+
+<div class="toolbar">
+  @for (f of filters; track f.id) {
+    <button [class.active]="filter() === f.id" (click)="filter.set(f.id)">
+      {{ f.label }}
+    </button>
+  }
+</div>
+
+@if (loading()) {
+  <p>Cargando bloque...</p>
+} @else if (error()) {
+  <p class="err">
+    No se pudo cargar el resumen del bloque. Puede que el nodo conectado no
+    tenga el endpoint <code>/v1/block/{{ '{' }}hash{{ '}' }}/summary</code>.
+  </p>
+} @else if (rects().length === 0) {
+  <p>Este bloque no tiene transacciones.</p>
+} @else {
+  <div
+    class="wrap"
+    (mousemove)="onMove($event)"
+    (mouseleave)="hovered.set(null)"
+    (click)="onClick($event)"
+  >
+    <svg [attr.viewBox]="'0 0 ' + W + ' ' + H">
+      @for (r of rects(); track r.tx.txid; let i = $index) {
+        <rect
+          [attr.data-i]="i"
+          [attr.x]="r.x"
+          [attr.y]="r.y"
+          [attr.width]="r.w"
+          [attr.height]="r.h"
+          [attr.fill]="r.color"
+          [attr.opacity]="matches(r) ? 1 : 0.12"
+        />
+      }
+    </svg>
+
+    @if (hovered(); as h) {
+      <div
+        class="tip"
+        [style.left.px]="tip().flip ? tip().x - 254 : tip().x + 14"
+        [style.top.px]="tip().y + 14"
+      >
+        <div><span class="k">Transacción</span><span class="id">{{ short(h.tx.txid) }}</span></div>
+        @if (h.coinbase) {
+          <div><span class="k">Tipo</span><span>Coinbase (recompensa)</span></div>
+        } @else {
+          <div><span class="k">Tasa</span><span>{{ h.tx.rate | number: '1.0-2' }} sat/vB</span></div>
+          <div><span class="k">Comisión</span><span>{{ h.tx.fee }} sats</span></div>
+        }
+        <div><span class="k">Tamaño virtual</span><span>{{ h.tx.vsize / 1000 | number: '1.2-2' }} kvB</span></div>
+        <div><span class="k">Cantidad</span><span>{{ h.tx.value / 1e8 | number: '1.0-8' }} BTC</span></div>
+      </div>
+    }
+  </div>
+
+  <div class="legend">
+    <span>1 sat/vB</span>
+    <div class="bar"></div>
+    <span>100+ sat/vB</span>
+    <span class="cb"><i></i> Coinbase</span>
+  </div>
+}

@@ -1,0 +1,22 @@
+@if (block$ | async; as b) {
+  <h2>Bloque #{{ b.height }}</h2>
+  <ul>
+    <li><b>Hash:</b> {{ b.id }}</li>
+    <li><b>Fecha:</b> {{ b.timestamp * 1000 | date: 'medium' }}</li>
+    <li><b>Transacciones:</b> {{ b.tx_count }}</li>
+    <li><b>Tamaño:</b> {{ b.size }} bytes</li>
+    <li><b>Minero:</b> {{ b.extras?.pool?.name }}</li>
+  </ul>
+  <app-block-treemap [hash]="b.id" />
+} @else {
+  <p>Cargando bloque...</p>
+}
+
+<h3>Transacciones (primeras 25)</h3>
+@if (txs$ | async; as txs) {
+  <ul>
+    @for (t of txs; track t.txid) {
+      <li><a [routerLink]="['/tx', t.txid]">{{ t.txid }}</a></li>
+    }
+  </ul>
+}

@@ -1,0 +1,79 @@
+<h2>Diagnóstico de transacciones rechazadas</h2>
+<p class="intro">
+  Pegá el hex de una transacción firmada. La app la envía a la red de prueba y, si la rechaza,
+  te explica el motivo en lenguaje claro.
+</p>
+
+<div class="banner warn">
+  <strong>Atención:</strong> si la transacción es válida, se transmite de verdad. Usalo solo con
+  redes de prueba.
+</div>
+
+@if (isTestNet()) {
+  <p class="net ok">Red conectada: <code>{{ apiUrl() }}</code></p>
+} @else {
+  <div class="banner err">
+    <strong>Envío deshabilitado.</strong> La API conectada (<code>{{ apiUrl() }}</code>) no parece
+    una red de prueba. Cambiala en <a routerLink="/node">Nodo</a> (por ejemplo, a testnet4).
+  </div>
+}
+
+<textarea
+  rows="6"
+  spellcheck="false"
+  placeholder="Pegá acá el hex de la transacción (0200000001...)"
+  [value]="hex()"
+  (input)="setHex($any($event.target).value)"
+></textarea>
+
+@if (check().message) {
+  <p class="check" [class.ok]="check().level === 'ok'" [class.warn]="check().level === 'warn'" [class.bad]="check().level === 'error'">
+    {{ check().message }}
+  </p>
+}
+
+<div class="actions">
+  <button (click)="send()" [disabled]="!canSend()">
+    {{ sending() ? 'Enviando...' : 'Diagnosticar y enviar' }}
+  </button>
+  <span class="hint">Ejemplos para probar:</span>
+  <button class="secondary" (click)="loadExample('truncated')">Hex cortado</button>
+  <button class="secondary" (click)="loadExample('missing')">Entrada inexistente</button>
+</div>
+
+@if (outcome(); as o) {
+  @if (o.kind === 'accepted') {
+    <div class="result good">
+      <h3>La red aceptó la transacción</h3>
+      <p class="mono">{{ o.txid }}</p>
+      <p>
+        <a [routerLink]="['/track', o.txid]">Seguirla con el rastreador</a> ·
+        <a [routerLink]="['/tx', o.txid]">Ver el detalle</a>
+      </p>
+    </div>
+  } @else if (o.kind === 'rejected') {
+    <div class="result bad">
+      <h3>{{ o.info.title }}</h3>
+      <p>{{ o.info.explain }}</p>
+      <p><b>Cómo arreglarlo:</b> {{ o.info.fix }}</p>
+      <details>
+        <summary>Mensaje técnico del nodo</summary>
+        <p class="mono">{{ o.info.technical }}</p>
+        @if (o.info.code !== null) { <p class="hint">Código de error: {{ o.info.code }}</p> }
+      </details>
+    </div>
+  } @else if (o.kind === 'ratelimit') {
+    <div class="result warn">
+      <h3>Demasiadas peticiones</h3>
+      <p>La API te frenó temporalmente (error 429). Esperá un rato y probá de nuevo.</p>
+    </div>
+  } @else {
+    <div class="result warn">
+      <h3>No se pudo conectar con la API</h3>
+      <p>
+        Puede ser un problema de internet, o que esa API no permita enviar transacciones desde el
+        navegador (CORS). Abrí F12 → Consola: si ves un error de CORS, es eso.
+      </p>
+    </div>
+  }
+}

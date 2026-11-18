@@ -1,0 +1,72 @@
+:host {
+  position: relative;
+  display: block;
+  flex: 1;
+  max-width: 520px;
+  min-width: 220px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #1d1f31;
+  border: 1px solid #2a2d4a;
+  border-radius: 999px;
+  padding: 0.25rem 0.25rem 0.25rem 0.9rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search:focus-within {
+  border-color: #f7931a;
+  box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.2);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: #8b8fa8;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e5e7f0;
+  font-size: 0.95rem;
+  padding: 0.45rem 0;
+}
+
+input::placeholder {
+  color: #8b8fa8;
+}
+
+button {
+  background: #f7931a;
+  color: #111;
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #ffa940;
+}
+
+.error {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0.9rem;
+  color: #ff6b6b;
+  font-size: 0.8rem;
+}

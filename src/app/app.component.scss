@@ -1,0 +1,17 @@
+header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  background: #11131f;
+}
+
+
+.logo { color: #f7931a; font-weight: bold; text-decoration: none; font-size: 1.3rem; }
+main { padding: 2rem; }
+
+nav { display: flex; gap: 1rem; }
+nav a { text-decoration: none; }
+.status { font-size: 0.85rem; color: #8b8fa8; white-space: nowrap; }
+.status.ok { color: #4caf50; }
+.status.err { color: #ff6b6b; }

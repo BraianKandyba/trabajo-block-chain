@@ -1,0 +1,14 @@
+<header>
+  <a routerLink="/" class="logo">Mi Mempool</a>
+  <nav>
+    <a routerLink="/">Inicio</a>
+    <a routerLink="/node">Servidor</a>
+    <a routerLink="/track">Rastrear Transacción</a>
+    <a routerLink="/diagnostico">Diagnóstico</a>
+  </nav>
+  <app-search-bar />
+  <span class="status" [class.ok]="tip()?.ok" [class.err]="tip() && !tip()?.ok">
+    @if (tip()?.ok) { ● #{{ tip()?.height }} } @else { ● sin conexión }
+  </span>
+</header>
+<main><router-outlet /></main>

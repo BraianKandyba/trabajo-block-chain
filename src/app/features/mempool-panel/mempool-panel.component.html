@@ -1,0 +1,108 @@
+<h2>Mempool</h2>
+
+@if (error()) {
+  <p class="err">No se pudo cargar el mempool de este nodo.</p>
+} @else if (loading()) {
+  <p>Cargando mempool...</p>
+} @else {
+  <div class="grid">
+    <!-- Estadísticas + gráfico -->
+    <section class="card stats">
+      <div class="stat-row">
+        <div class="stat">
+          <span class="k">Tarifa mínima</span>
+          <strong>{{ fees()?.minimumFee | number: '1.2-2' }} <small>sat/vB</small></strong>
+        </div>
+        <div class="stat">
+          <span class="k">Tamaño del mempool</span>
+          <strong>{{ vsizeLabel(mempool()?.vsize ?? 0) }}</strong>
+        </div>
+        <div class="stat">
+          <span class="k">Sin confirmar</span>
+          <strong>{{ mempool()?.count ?? 0 }} <small>TXs</small></strong>
+        </div>
+      </div>
+
+      <h3 class="chart-title">Tamaño del mempool en el tiempo</h3>
+      @if (chart(); as c) {
+        <svg class="chart" [attr.viewBox]="'0 0 ' + c.W + ' ' + c.H">
+          @for (y of c.grid; track y) {
+            <line x1="0" [attr.x2]="c.W" [attr.y1]="y" [attr.y2]="y" />
+          }
+          <polygon class="area" [attr.points]="c.area" />
+          <polyline class="line" [attr.points]="c.line" />
+        </svg>
+<div class="axis">
+  <span>{{ c.from | date: 'HH:mm:ss' }}</span>
+  <span>mín. {{ vsizeLabel(c.min) }} · máx. {{ vsizeLabel(c.max) }}</span>
+  <span>{{ c.to | date: 'HH:mm:ss' }}</span>
+</div>
+      } @else {
+        <p class="hint">Recopilando datos... el gráfico aparece con la segunda muestra (cada 15 s).</p>
+      }
+    </section>
+
+    <!-- Reemplazos recientes -->
+    <section class="card">
+      <h3>Reemplazos recientes</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>TXID</th>
+            <th class="r">Tasa anterior</th>
+            <th class="r">Nueva tasa</th>
+            <th class="r">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rbfRows(); track r.txid) {
+            <tr>
+              <td><a [routerLink]="['/tx', r.txid]">{{ short(r.txid) }}</a></td>
+              <td class="r">
+                @if (r.oldRate !== null) {
+                  {{ r.oldRate | number: '1.1-2' }} <small>sat/vB</small>
+                } @else { — }
+              </td>
+              <td class="r">
+                @if (r.newRate !== null) {
+                  {{ r.newRate | number: '1.1-2' }} <small>sat/vB</small>
+                } @else { — }
+              </td>
+              <td class="r">
+                @if (r.mined) { <span class="badge">Minado</span> }
+                <span class="badge">{{ r.fullRbf ? 'Full RBF' : 'RBF' }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="hint">Sin reemplazos recientes.</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Transacciones recientes -->
+    <section class="card">
+      <h3>Transacciones recientes</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>TXID</th>
+            <th class="r">Cantidad</th>
+            <th class="r">Tasa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of recentRows(); track t.txid) {
+            <tr>
+              <td><a [routerLink]="['/tx', t.txid]">{{ short(t.txid) }}</a></td>
+              <td class="r">{{ t.value / 1e8 | number: '1.0-4' }} <small>{{ unit() }}</small></td>
+              <td class="r">{{ t.rate | number: '1.1-2' }} <small>sat/vB</small></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="hint">El mempool está vacío.</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+}

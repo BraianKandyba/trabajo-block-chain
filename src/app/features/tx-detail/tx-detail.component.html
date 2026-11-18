@@ -1,0 +1,52 @@
+@if (tx$ | async; as tx) {
+  <h2>Transacción</h2>
+  <p style="word-break: break-all; font-family: monospace">{{ tx.txid }}</p>
+
+  <p>
+    <b>Estado:</b>
+    @if (tx.status.confirmed) {
+      Confirmada en el bloque
+      <a [routerLink]="['/block', tx.status.block_hash]">#{{ tx.status.block_height }}</a>
+    } @else {
+      Sin confirmar
+      <a [routerLink]="['/track', tx.txid]">Seguir esta transacción</a>
+    }
+  </p>
+  <p><b>Comisión:</b> {{ tx.fee }} sats · <b>Tamaño:</b> {{ tx.size }} bytes</p>
+
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap">
+    <div style="flex: 1; min-width: 280px">
+      <h3>Entradas ({{ tx.vin.length }})</h3>
+      @for (i of tx.vin; track $index) {
+        <p style="word-break: break-all">
+          @if (i.is_coinbase) {
+            Coinbase (recompensa de minería)
+          } @else {
+            @if (i.prevout?.scriptpubkey_address; as addr) {
+              <a [routerLink]="['/address', addr]">{{ addr }}</a>
+            } @else {
+              Dirección desconocida
+            }
+            — {{ (i.prevout?.value ?? 0) / 1e8 | number: '1.0-8' }} BTC
+          }
+        </p>
+      }
+    </div>
+
+    <div style="flex: 1; min-width: 280px">
+      <h3>Salidas ({{ tx.vout.length }})</h3>
+      @for (o of tx.vout; track $index) {
+        <p style="word-break: break-all">
+          @if (o.scriptpubkey_address; as addr) {
+            <a [routerLink]="['/address', addr]">{{ addr }}</a>
+          } @else {
+            OP_RETURN / sin dirección
+          }
+          — {{ o.value / 1e8 | number: '1.0-8' }} BTC
+        </p>
+      }
+    </div>
+  </div>
+} @else {
+  <p>Cargando transacción...</p>
+}

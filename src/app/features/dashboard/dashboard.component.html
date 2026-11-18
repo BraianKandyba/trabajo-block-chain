@@ -1,0 +1,28 @@
+<h2>Comisiones recomendadas</h2>
+@if (fees$ | async; as fees) {
+  <div class="fees">
+    <div class="card fast"><span>Rápida</span><strong>{{ fees.fastestFee }} sat/vB</strong></div>
+    <div class="card mid"><span>Media</span><strong>{{ fees.halfHourFee }} sat/vB</strong></div>
+    <div class="card low"><span>Baja</span><strong>{{ fees.hourFee }} sat/vB</strong></div>
+  </div>
+} @else {
+  <p>Cargando comisiones...</p>
+}
+
+<h2>Últimos bloques</h2>
+@if (blocks$ | async; as blocks) {
+  <div class="blocks">
+    @for (b of blocks; track b.id) {
+      <a class="card block" [routerLink]="['/block', b.id]">
+        <strong>#{{ b.height }}</strong>
+        <span>{{ b.tx_count }} txs</span>
+        <span>{{ b.extras?.pool?.name }}</span>
+        <small>{{ b.timestamp * 1000 | date: 'short' }}</small>
+      </a>
+    }
+  </div>
+} @else {
+  <p>Cargando bloques...</p>
+}
+
+<app-mempool-panel />

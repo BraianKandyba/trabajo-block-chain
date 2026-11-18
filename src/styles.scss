@@ -1,0 +1,19 @@
+/* You can add global styles to this file, and also import other style files */
+body { margin: 0; background: #0d0f1a; color: #e5e7f0; font-family: system-ui, sans-serif; }
+a { color: #6ea8fe; }
+input { padding: 0.5rem; width: 300px; }
+
+:root {
+  --bg: #0d0f1a;
+  --surface: #1d1f31;
+  --surface-hover: #2a2d4a;
+  --text: #e5e7f0;
+  --text-muted: #8b8fa8;
+  --accent: #f7931a;
+  --link: #6ea8fe;
+  --success: #4caf50;
+  --warning: #ffd54f;
+  --danger: #ff6b6b;
+  --radius: 10px;
+  --gap: 1rem;
+}

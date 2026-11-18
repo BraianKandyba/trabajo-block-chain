@@ -1,0 +1,55 @@
+@if (error()) {
+  <h2>Dirección no encontrada</h2>
+  <p>Revisá que sea una dirección válida de la red a la que estás conectado.</p>
+} @else {
+  @if (info$ | async; as info) {
+    <h2>Dirección</h2>
+    <p class="addr">{{ info.address }}</p>
+
+    <div class="summary">
+      <div class="card">
+        <span>Balance</span>
+        <strong>{{ balance(info) / 1e8 | number: '1.0-8' }} BTC</strong>
+      </div>
+      <div class="card">
+        <span>Transacciones</span>
+        <strong>{{ info.chain_stats.tx_count + info.mempool_stats.tx_count }}</strong>
+      </div>
+      <div class="card">
+        <span>Total recibido</span>
+        <strong>{{ info.chain_stats.funded_txo_sum / 1e8 | number: '1.0-8' }} BTC</strong>
+      </div>
+      <div class="card">
+        <span>Total enviado</span>
+        <strong>{{ info.chain_stats.spent_txo_sum / 1e8 | number: '1.0-8' }} BTC</strong>
+      </div>
+    </div>
+
+    <h3>Transacciones</h3>
+    @for (t of txs(); track t.txid) {
+      <div class="tx">
+        <a [routerLink]="['/tx', t.txid]" class="txid">{{ t.txid }}</a>
+        <div class="meta">
+          @if (t.status.confirmed) {
+            <span>Bloque #{{ t.status.block_height }} · {{ (t.status.block_time ?? 0) * 1000 | date: 'short' }}</span>
+          } @else {
+            <span class="pending">Sin confirmar</span>
+          }
+          <strong [class.pos]="net(t) > 0" [class.neg]="net(t) < 0">
+            {{ net(t) > 0 ? '+' : '' }}{{ net(t) / 1e8 | number: '1.0-8' }} BTC
+          </strong>
+        </div>
+      </div>
+    } @empty {
+      <p>Esta dirección no tiene transacciones.</p>
+    }
+
+    @if (!done() && txs().length > 0) {
+      <button (click)="loadMore()" [disabled]="loadingMore()">
+        {{ loadingMore() ? 'Cargando...' : 'Cargar más' }}
+      </button>
+    }
+  } @else {
+    <p>Cargando dirección...</p>
+  }
+}

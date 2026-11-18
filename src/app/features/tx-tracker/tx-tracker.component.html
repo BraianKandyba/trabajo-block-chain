@@ -1,0 +1,132 @@
+<h2>Rastrear transacción</h2>
+
+<div class="search">
+  <input
+    #box
+    type="text"
+    placeholder="Pegá un txid o el link de la transacción"
+    [value]="txid()"
+    (keyup.enter)="go(box.value)"
+  />
+  <button (click)="go(box.value)">Seguir</button>
+</div>
+@if (formError()) { <p class="err">{{ formError() }}</p> }
+
+@if (txid()) {
+  @if (phase() === 'mempool' || phase() === 'confirmed') {
+    <ol class="steps">
+      <li [class.done]="step() >= 1" [class.active]="step() === 1">Transmitida</li>
+      <li [class.done]="step() >= 2" [class.active]="step() === 2">En el mempool</li>
+      <li [class.done]="step() >= 3" [class.active]="step() === 3">Confirmada</li>
+    </ol>
+  }
+
+  <p class="txid">
+    <a [routerLink]="['/tx', txid()]">{{ txid() }}</a>
+  </p>
+
+  @switch (phase()) {
+    @case ('searching') {
+      <p>Buscando la transacción...</p>
+    }
+
+    @case ('notfound') {
+      <div class="panel warn">
+        <strong>No se encontró (todavía).</strong>
+        <p>
+          Revisá que el txid sea de la red a la que estás conectado. Si la acabás de enviar,
+          puede tardar unos segundos en aparecer: seguimos buscando cada 15 segundos.
+        </p>
+      </div>
+    }
+
+    @case ('gaveup') {
+      <div class="panel warn">
+        <strong>Dejamos de buscar.</strong>
+        <p>No apareció en unos 5 minutos. Verificá el txid y la red, y volvé a intentarlo.</p>
+      </div>
+    }
+
+    @case ('lost') {
+      <div class="panel warn">
+        <strong>La transacción desapareció del mempool.</strong>
+        <p>
+          Puede haber sido reemplazada por otra (RBF) o descartada por la red. Si la reemplazaste
+          vos, seguí el txid nuevo.
+        </p>
+      </div>
+    }
+
+    @case ('mempool') {
+      @if (tx(); as t) {
+        <div class="grid">
+          <div class="card"><span class="k">Comisión</span><strong>{{ t.fee | number }} sats</strong></div>
+          <div class="card"><span class="k">Tasa</span><strong>{{ rate() | number: '1.2-2' }} sat/vB</strong></div>
+          <div class="card"><span class="k">Tamaño virtual</span><strong>{{ vsize() | number: '1.0-2' }} vB</strong></div>
+          <div class="card">
+            <span class="k">Prioridad</span>
+            @if (priority(); as p) {
+              <strong [class]="p.cls">{{ p.label }}</strong>
+            } @else {
+              <strong>—</strong>
+            }
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Cuándo se confirmaría</h3>
+          @if (ahead(); as a) {
+            <p>
+              Con esta tasa, la transacción entraría aproximadamente en el
+              <b>bloque n.º {{ a.blocks }}</b> de la cola
+              (hay {{ vsizeLabel(a.vsizeAhead) }} de transacciones que pagan más).
+            </p>
+            <p>
+              Tiempo estimado: <b>~{{ a.blocks * 10 }} min</b>
+              <small>(se asume un bloque cada 10 min; en testnet4 puede variar mucho).</small>
+            </p>
+          } @else {
+            <p class="hint">No hay datos del mempool para estimar la posición en este nodo.</p>
+          }
+        </div>
+      }
+    }
+
+    @case ('confirmed') {
+      @if (tx(); as t) {
+        <div class="panel ok">
+          <h3>Transacción confirmada</h3>
+          <p>
+            Entró en el bloque
+            <a [routerLink]="['/block', t.status.block_hash]">#{{ t.status.block_height }}</a>
+            @if (t.status.block_time) {
+              el {{ t.status.block_time * 1000 | date: 'medium' }}.
+            }
+          </p>
+          @if (confirmations(); as c) {
+            <p>Confirmaciones: <b>{{ c }}</b></p>
+          }
+          <p>Comisión pagada: <b>{{ t.fee | number }} sats</b> ({{ rate() | number: '1.2-2' }} sat/vB).</p>
+        </div>
+      }
+    }
+  }
+
+  @if (phase() === 'mempool' || phase() === 'notfound') {
+    <div class="footer">
+      @if (canNotify && !notifyOn()) {
+        <button class="secondary" (click)="enableNotifications()">🔔 Avisarme cuando se confirme</button>
+      }
+      @if (notifyOn()) {
+        <span class="hint">🔔 Te avisamos con una notificación (dejá esta pestaña abierta).</span>
+      }
+      @if (lastCheck(); as ts) {
+        <span class="hint">Última revisión: {{ ts | date: 'HH:mm:ss' }}</span>
+      }
+    </div>
+  }
+
+  @if (netError()) {
+    <p class="err">Problemas de conexión con el nodo. Reintentando...</p>
+  }
+}

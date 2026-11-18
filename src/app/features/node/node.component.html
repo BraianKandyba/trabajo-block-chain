@@ -1,0 +1,34 @@
+<h2>Conexión al Servidorr</h2>
+
+<p>
+  API actual: <code>{{ api.baseUrl() }}</code>
+  <span class="tag">{{ isCustom() ? 'Personalizado' : 'Público' }}</span>
+</p>
+
+<div class="panel">
+  <h3>cambiar servidor</h3>
+  <p class="hint">
+    Ingresá la URL base de una API compatible con mempool
+    
+  </p>
+  <div class="row">
+    <input #urlBox type="text" placeholder="https://mi-nodo.com/api"
+           [value]="isCustom() ? api.baseUrl() : ''"
+           (keyup.enter)="connect(urlBox.value)" />
+    <button (click)="connect(urlBox.value)">Probar y guardar</button>
+  </div>
+
+  <button class="secondary" (click)="usePublic()">
+    Volver al público (mempool.space testnet4)
+  </button>
+</div>
+
+@switch (status()) {
+  @case ('testing') { <p class="msg">Probando conexión...</p> }
+  @case ('ok') { <p class="msg ok">Conectado. Último bloque: #{{ height() }}</p> }
+  @case ('error') {
+    <p class="msg err">
+      No se pudo conectar. Revisá la URl
+    </p>
+  }
+}
